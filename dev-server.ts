@@ -1,4 +1,4 @@
-import { buildApp } from "./src/server/app";
+import { buildApp } from "./src/server/app.js";
 
 const port = Number(process.env.PORT ?? 4000);
 const app = buildApp();

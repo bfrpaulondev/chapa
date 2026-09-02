@@ -1,4 +1,5 @@
 import fastify, { type FastifyInstance } from "fastify";
+import mongoose from "mongoose";
 import {
   db,
   ProfileModel,
@@ -12,19 +13,30 @@ import {
   DailyBriefModel,
   TipCacheModel,
   today,
-} from "./db";
-import { BASE_SYSTEM, complete, completeJSON, stream, userContext, vision } from "./ai";
+} from "./db.js";
+import { BASE_SYSTEM, complete, completeJSON, stream, userContext, vision } from "./ai.js";
 
 const MAX_IMAGE_CHARS = 6_000_000; // ~4.5MB de imagem base64
 
 export function buildApp(): FastifyInstance {
   const app = fastify({ logger: false, bodyLimit: 12_000_000 });
 
-  app.addHook("onRequest", async () => {
+  app.addHook("onRequest", async (req) => {
+    if (req.url.startsWith("/api/health")) return; // health nunca depende do Mongo
     await db();
   });
 
-  app.get("/api/health", async () => ({ ok: true, ts: Date.now() }));
+  app.get("/api/health", async () => {
+    let mongo = "ok";
+    try {
+      await db();
+      await mongoose.connection.db?.admin().ping();
+    } catch (e) {
+      mongo = (e as Error).message.slice(0, 200);
+    }
+    const openai = process.env.OPENAI_API_KEY ? "ok" : "faltando";
+    return { ok: true, ts: Date.now(), mongo, openai };
+  });
 
   // ---------- Perfil ----------
   app.get("/api/profile", async () => ProfileModel.findOne().sort({ updatedAt: -1 }).lean());

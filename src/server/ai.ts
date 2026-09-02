@@ -4,7 +4,7 @@ import {
   WorkoutPlanModel,
   MetricModel,
   SupplementModel,
-} from "./db";
+} from "./db.js";
 
 const MODEL = process.env.AI_MODEL ?? "gpt-4o-mini";
 const VISION_MODEL = process.env.AI_VISION_MODEL ?? "gpt-4o";
