@@ -1,0 +1,15 @@
+{
+  "name": "CHAPA",
+  "short_name": "CHAPA",
+  "description": "Treino, suplementos e progresso — barriga chapada, braço grosso.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0c0c0e",
+  "theme_color": "#0c0c0e",
+  "lang": "pt-PT",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
