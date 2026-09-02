@@ -9,7 +9,16 @@ let connPromise: Promise<typeof mongoose> | null = null;
 
 export function db() {
   if (!connPromise) {
-    connPromise = mongoose.connect(MONGODB_URI, { dbName: "chapa" });
+    connPromise = mongoose
+      .connect(MONGODB_URI, {
+        dbName: "chapa",
+        connectTimeoutMS: 8_000,
+        serverSelectionTimeoutMS: 8_000,
+      })
+      .catch((error) => {
+        connPromise = null;
+        throw error;
+      });
   }
   return connPromise;
 }
