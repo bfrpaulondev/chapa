@@ -1,0 +1,15 @@
+{
+  "name": "CHAPA — Treino + Coach IA",
+  "short_name": "CHAPA",
+  "description": "Treino, nutrição, suplementos e coach IA — barriga chapada, braço grosso.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0c0c0e",
+  "theme_color": "#0c0c0e",
+  "lang": "pt",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
