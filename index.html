@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0c0c0e" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="CHAPA" />
+  <title>CHAPA</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon.svg" />
+  <link rel="icon" href="icon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="top">
+      <div class="brand">CHAPA</div>
+      <small id="clock"></small>
+    </header>
+    <div id="installBanner" class="install">
+      <b>Instalar no telemóvel</b>
+      <p style="margin:6px 0 10px;color:var(--mute);font-size:13px">iPhone: Partilhar → Adicionar ao ecrã inicial. Android: Instalar app.</p>
+      <button class="btn" id="installBtn" type="button">Instalar CHAPA</button>
+    </div>
+    <section id="s-hoje" class="screen on"></section>
+    <section id="s-treino" class="screen"></section>
+    <section id="s-corpo" class="screen"></section>
+    <section id="s-mais" class="screen"></section>
+  </div>
+  <nav class="nav">
+    <button class="on" data-s="hoje"><span>⚡</span>Hoje</button>
+    <button data-s="treino"><span>🏋️</span>Treino</button>
+    <button data-s="corpo"><span>📷</span>Corpo</button>
+    <button data-s="mais"><span>☰</span>Mais</button>
+  </nav>
+  <div id="modal" class="modal" onclick="if(event.target.id==='modal')closeModal()">
+    <div class="sheet" id="sheet"></div>
+  </div>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
