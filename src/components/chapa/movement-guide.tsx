@@ -154,9 +154,13 @@ export function MovementGuide({ exerciseName }: { exerciseName: string }) {
           <path className="motion-grid-line" d="M26 235 H305 M26 190 H305 M26 145 H305 M26 100 H305 M70 28 V252 M125 28 V252 M180 28 V252 M235 28 V252" />
           <path className="motion-circuit-shadow" d={profile.circuit} />
           <path className="motion-circuit" d={profile.circuit} stroke={`url(#circuit-${profile.kind})`} />
-          <circle className="circuit-dot" cx="78" cy="78" r="7" fill={`url(#joint-${profile.kind})`}>
-            {playing ? <animateMotion dur="4.2s" repeatCount="indefinite" path={profile.circuit} /> : null}
-          </circle>
+          {playing ? (
+            <circle className="circuit-dot" r="7" fill={`url(#joint-${profile.kind})`}>
+              <animateMotion dur="4.2s" repeatCount="indefinite" path={profile.circuit} />
+            </circle>
+          ) : (
+            <circle className="circuit-dot" cx="78" cy="78" r="7" fill={`url(#joint-${profile.kind})`} />
+          )}
           <Athlete kind={profile.kind} />
         </svg>
         <div className="motion-callout"><ThunderboltFilled /><span>{active.cue}</span><b>{active.intensity}%</b></div>
