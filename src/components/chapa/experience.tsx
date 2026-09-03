@@ -58,6 +58,7 @@ import {
   type WorkoutPlan,
 } from "@/lib/api";
 import { MovementGuide } from "./movement-guide";
+import { YouTubeExercise } from "./youtube-exercise";
 
 const { Header, Sider, Content } = Layout;
 const { TextArea } = Input;
@@ -346,15 +347,19 @@ function WorkoutStudio() {
 
   async function openGuide(exercise: PlanDay["exercises"][number]) {
     setGuideOpen(true);
-    setGuide(null);
-    setGuideLoading(true);
-    try {
-      setGuide(await api<ExerciseGuide>(`/api/exercises/search?q=${encodeURIComponent(exercise.lookup || exercise.name)}`));
-    } catch (error) {
-      message.error((error as Error).message);
-    } finally {
-      setGuideLoading(false);
-    }
+    setGuideLoading(false);
+    setGuide({
+      name: exercise.name,
+      muscles: [],
+      steps: [
+        exercise.notes,
+        "Controla a fase de descida durante 2–3 segundos.",
+        "Mantém o tronco estável e as articulações alinhadas.",
+        "Interrompe a série se houver dor aguda ou perda de técnica.",
+      ].filter(Boolean),
+      videos: [],
+      available: true,
+    });
   }
 
   async function finishWorkout() {
@@ -414,58 +419,16 @@ function WorkoutStudio() {
   );
 }
 
-// -.-.-.- Synchronize movement phases and an intensity marker with video playback progress.
+// -.-.-.- Pair a reviewed human demonstration with the autonomous movement guide.
 function ExerciseStudio({ guide }: { guide: ExerciseGuide }) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [progress, setProgress] = useState(0);
-  const [angle, setAngle] = useState(guide.videos[0]?.angle);
-  const video = guide.videos.find((item) => item.angle === angle) ?? guide.videos[0];
-  const phaseProgress = (progress * 3) % 1;
-  const phaseIndex = Math.min(2, Math.floor(progress * 3));
-  const phases = [
-    { label: "DESCIDA", cue: "Controla 2–3 segundos", intensity: 58 },
-    { label: "PAUSA", cue: "Mantém tensão e alinhamento", intensity: 72 },
-    { label: "SUBIDA", cue: "Acelera sem perder a forma", intensity: 92 },
-  ];
-
   return (
     <div className="studio-stack">
-      <div><Tag color="lime">MUSCLEWIKI</Tag><h2>{guide.name}</h2><Space wrap>{guide.muscles.map((muscle) => <Tag key={muscle}>{muscle}</Tag>)}</Space></div>
-      {guide.available && video ? (
-        <>
-          <div className="video-stage">
-            <video
-              key={video.url}
-              ref={videoRef}
-              src={video.url}
-              poster={video.thumbnail}
-              controls
-              loop
-              playsInline
-              onTimeUpdate={(event) => {
-                const current = event.currentTarget;
-                setProgress(current.duration ? current.currentTime / current.duration : 0);
-              }}
-            />
-            <div className="video-coach-chip"><RobotOutlined /> {phases[phaseIndex].cue}</div>
-          </div>
-          {guide.videos.length > 1 && <Segmented value={angle} options={guide.videos.map((item) => ({ label: `Ângulo ${item.angle}`, value: item.angle }))} onChange={setAngle} />}
-          <Card className="intensity-card" bordered={false}>
-            <Flex justify="space-between"><strong>INTENSIDADE DO MOVIMENTO</strong><span>{phases[phaseIndex].intensity}%</span></Flex>
-            <div className="intensity-track">
-              {Array.from({ length: 26 }, (_, index) => <i key={index} style={{ height: `${28 + ((index * 37) % 64)}%` }} />)}
-              <span className="intensity-marker" style={{ left: `${Math.max(2, progress * 96)}%` }} />
-            </div>
-            <Flex justify="space-between" className="phase-labels">{phases.map((phase, index) => <span className={index === phaseIndex ? "active" : ""} key={phase.label}>{phase.label}</span>)}</Flex>
-            <Progress percent={Math.round(phaseProgress * 100)} showInfo={false} strokeColor={MODE_META.push.color} />
-          </Card>
-        </>
-      ) : null}
+      <div><Tag color="lime">ESTÚDIO VIGOR</Tag><h2>{guide.name}</h2></div>
+      <YouTubeExercise exerciseName={guide.name} />
       <MovementGuide exerciseName={guide.name} />
-      {!guide.available && guide.reason ? <p className="optional-video-note">Vídeo externo opcional: {guide.reason}</p> : null}
       <Card title="Pontos de técnica" bordered={false}>
         <Timeline items={guide.steps.slice(0, 6).map((step) => ({ children: step, color: "#c7ff4a" }))} />
-        <p className="safety-note">Indicadores educativos sincronizados com o vídeo; não substituem avaliação presencial nem fazem análise da câmara.</p>
+        <p className="safety-note">O vídeo demonstra a execução e o guia mostra o tempo, as fases e a intensidade relativa. Não substituem avaliação presencial nem fazem análise da câmara.</p>
       </Card>
     </div>
   );
