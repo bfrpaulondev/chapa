@@ -55,8 +55,11 @@ import {
   type Metric,
   type PlanDay,
   type Profile,
+  type WorkoutLog,
   type WorkoutPlan,
+  type WorkoutSet,
 } from "@/lib/api";
+import { LoadPrescription } from "./load-prescription";
 import { MovementGuide } from "./movement-guide";
 import { YouTubeExercise } from "./youtube-exercise";
 
@@ -323,11 +326,18 @@ function WorkoutStudio() {
   const [guide, setGuide] = useState<ExerciseGuide | null>(null);
   const [guideOpen, setGuideOpen] = useState(false);
   const [guideLoading, setGuideLoading] = useState(false);
+  const [activeExercise, setActiveExercise] = useState<PlanDay["exercises"][number] | null>(null);
+  const [workoutLogs, setWorkoutLogs] = useState<WorkoutLog[]>([]);
+  const [sessionSets, setSessionSets] = useState<Record<string, WorkoutSet[]>>({});
 
   useEffect(() => {
-    api<WorkoutPlan | null>("/api/plan/workout").then((value) => {
+    Promise.all([
+      api<WorkoutPlan | null>("/api/plan/workout"),
+      api<WorkoutLog[]>("/api/workout/logs?limit=30"),
+    ]).then(([value, logs]) => {
       setPlan(value);
       setSelectedDay(value?.days?.[0] ?? null);
+      setWorkoutLogs(logs);
     }).catch(() => undefined).finally(() => setLoading(false));
   }, []);
 
@@ -347,6 +357,7 @@ function WorkoutStudio() {
 
   async function openGuide(exercise: PlanDay["exercises"][number]) {
     setGuideOpen(true);
+    setActiveExercise(exercise);
     setGuideLoading(false);
     setGuide({
       name: exercise.name,
@@ -366,8 +377,14 @@ function WorkoutStudio() {
     if (!selectedDay) return;
     const result = await api<{ aiNotes: string }>("/api/workout/log", {
       method: "POST",
-      body: JSON.stringify({ planDay: selectedDay.day, feeling: "completed" }),
+      body: JSON.stringify({
+        planDay: selectedDay.day,
+        feeling: "completed",
+        exercises: selectedDay.exercises.map((exercise) => ({ name: exercise.name, sets: sessionSets[exercise.name] ?? [] })),
+      }),
     });
+    setWorkoutLogs(await api<WorkoutLog[]>("/api/workout/logs?limit=30"));
+    setSessionSets({});
     Modal.success({ title: "Treino concluído", content: result.aiNotes });
   }
 
@@ -398,7 +415,7 @@ function WorkoutStudio() {
                 className="exercise-list"
                 dataSource={selectedDay.exercises}
                 renderItem={(exercise, index) => (
-                  <List.Item actions={[<Button key="guide" type="text" icon={<PlayCircleFilled />} onClick={() => openGuide(exercise)}>Ver execução</Button>]}>
+                  <List.Item actions={[<Button key="guide" type="text" icon={<PlayCircleFilled />} onClick={() => openGuide(exercise)}>Executar e registar</Button>]}>
                     <List.Item.Meta
                       avatar={<span className="exercise-number">{String(index + 1).padStart(2, "0")}</span>}
                       title={exercise.name}
@@ -413,17 +430,32 @@ function WorkoutStudio() {
         </>
       )}
       <Drawer title="Estúdio de movimento" open={guideOpen} onClose={() => setGuideOpen(false)} width={720}>
-        {guideLoading ? <Skeleton active /> : guide ? <ExerciseStudio guide={guide} /> : <Empty />}
+        {guideLoading ? <Skeleton active /> : guide && activeExercise ? (
+          <ExerciseStudio
+            guide={guide}
+            exercise={activeExercise}
+            previousSets={workoutLogs.flatMap((log) => log.exercises ?? []).find((entry) => entry.name === activeExercise.name && entry.sets.some((set) => Number(set.weightKg) > 0))?.sets}
+            sessionSets={sessionSets[activeExercise.name] ?? []}
+            onSessionSetsChange={(sets) => setSessionSets((current) => ({ ...current, [activeExercise.name]: sets }))}
+          />
+        ) : <Empty />}
       </Drawer>
     </div>
   );
 }
 
 // -.-.-.- Pair a reviewed human demonstration with the autonomous movement guide.
-function ExerciseStudio({ guide }: { guide: ExerciseGuide }) {
+function ExerciseStudio({ guide, exercise, previousSets, sessionSets, onSessionSetsChange }: {
+  guide: ExerciseGuide;
+  exercise: PlanDay["exercises"][number];
+  previousSets?: WorkoutSet[];
+  sessionSets: WorkoutSet[];
+  onSessionSetsChange: (sets: WorkoutSet[]) => void;
+}) {
   return (
     <div className="studio-stack">
       <div><Tag color="lime">ESTÚDIO VIGOR</Tag><h2>{guide.name}</h2></div>
+      <LoadPrescription exercise={exercise} previousSets={previousSets} value={sessionSets} onChange={onSessionSetsChange} />
       <YouTubeExercise exerciseName={guide.name} />
       <MovementGuide exerciseName={guide.name} />
       <Card title="Pontos de técnica" bordered={false}>
