@@ -85,7 +85,7 @@ const WorkoutLog = new Schema(
     date: { type: String, required: true },
     planDay: String,
     exercises: [
-      { name: String, sets: [{ weightKg: Number, reps: Number }] },
+      { name: String, sets: [{ weightKg: Number, reps: Number, rir: Number }] },
     ],
     feeling: String,
     aiNotes: String,
