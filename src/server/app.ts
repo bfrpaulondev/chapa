@@ -222,8 +222,8 @@ export function buildApp(): FastifyInstance {
     try {
       return await findExerciseGuide(query.slice(0, 200));
     } catch (error) {
-      console.warn("[chapa] MuscleWiki unavailable:", (error as Error).message);
-      return reply.code(502).send({ error: "Vídeo indisponível neste momento. Tenta novamente." });
+      console.error("[chapa] MuscleWiki request failed", { error: (error as Error).message });
+      return reply.code(502).send({ error: "Não foi possível contactar o MuscleWiki neste momento." });
     }
   });
 

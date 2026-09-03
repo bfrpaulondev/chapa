@@ -35,6 +35,37 @@ export type ExerciseGuide = {
   reason?: string;
 };
 
+// -.-.-.- Preserve a usable exercise card while explaining provider failures precisely.
+function unavailableGuide(name: string, reason: string, steps?: string[]): ExerciseGuide {
+  return {
+    name,
+    muscles: [],
+    steps: steps ?? [
+      "Mantém o tronco estável e a articulação alinhada.",
+      "Controla a fase de descida durante 2–3 segundos.",
+      "Interrompe se houver dor aguda ou perda de técnica.",
+    ],
+    videos: [],
+    available: false,
+    reason,
+  };
+}
+
+// -.-.-.- Translate MuscleWiki status codes into actionable configuration feedback.
+async function providerReason(response: Response, stage: "search" | "media") {
+  const payload = await response.json().catch(() => null) as { detail?: string; message?: string; upgrade_url?: string } | null;
+  const detail = payload?.detail ?? payload?.message;
+  if (response.status === 401) return "A MUSCLEWIKI_API_KEY é inválida ou não foi reconhecida.";
+  if (response.status === 403) {
+    return stage === "search"
+      ? "A chave MuscleWiki do plano BASIC só funciona no Playground. Para usar vídeos nesta aplicação é necessário o plano TESTING ou superior."
+      : "A chave não tem acesso a tokens de vídeo. Confirma que o plano MuscleWiki é TESTING ou superior.";
+  }
+  if (response.status === 429) return "A quota mensal do MuscleWiki foi atingida. O vídeo volta após o reset ou aumento do plano.";
+  if (response.status === 501 && stage === "media") return "O MuscleWiki não conseguiu criar o token temporário de vídeo neste momento.";
+  return detail ? `MuscleWiki: ${detail}` : `MuscleWiki indisponível (${stage}, HTTP ${response.status}).`;
+}
+
 // -.-.-.- Append a short-lived media token without exposing the permanent API key.
 function withToken(url: string, token: string) {
   const target = new URL(url);
@@ -46,24 +77,13 @@ function withToken(url: string, token: string) {
 export async function findExerciseGuide(query: string): Promise<ExerciseGuide> {
   const key = process.env.MUSCLEWIKI_API_KEY;
   if (!key) {
-    return {
-      name: query,
-      muscles: [],
-      steps: [
-        "Mantém o tronco estável e a articulação alinhada.",
-        "Controla a fase de descida durante 2–3 segundos.",
-        "Interrompe se houver dor aguda ou perda de técnica.",
-      ],
-      videos: [],
-      available: false,
-      reason: "Define MUSCLEWIKI_API_KEY na Netlify para activar vídeos oficiais.",
-    };
+    return unavailableGuide(query, "Define MUSCLEWIKI_API_KEY na Netlify para activar vídeos oficiais.");
   }
 
   const headers = { "X-API-Key": key };
   const canonicalQuery = EXERCISE_ALIASES[query.toLocaleLowerCase("pt")] ?? query;
   const search = await fetch(`${MUSCLEWIKI_URL}/search?q=${encodeURIComponent(canonicalQuery)}&limit=1&gender=male`, { headers });
-  if (!search.ok) throw new Error(`MuscleWiki search ${search.status}`);
+  if (!search.ok) return unavailableGuide(query, await providerReason(search, "search"));
   const results = (await search.json()) as Array<{
     id: number;
     name: string;
@@ -79,7 +99,19 @@ export async function findExerciseGuide(query: string): Promise<ExerciseGuide> {
   }
 
   const tokenResponse = await fetch(`${MUSCLEWIKI_URL}/media/token`, { method: "POST", headers });
-  if (!tokenResponse.ok) throw new Error(`MuscleWiki media token ${tokenResponse.status}`);
+  if (!tokenResponse.ok) {
+    return {
+      id: exercise.id,
+      name: exercise.name,
+      muscles: exercise.primary_muscles ?? [],
+      equipment: exercise.category,
+      difficulty: exercise.difficulty,
+      steps: exercise.steps ?? [],
+      videos: [],
+      available: false,
+      reason: await providerReason(tokenResponse, "media"),
+    };
+  }
   const { token } = (await tokenResponse.json()) as { token: string };
 
   return {
