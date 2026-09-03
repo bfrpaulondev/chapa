@@ -66,6 +66,9 @@ export type PlanDay = {
 
 export type WorkoutPlan = { _id?: string; split?: string; goal?: string; daysPerWeek?: number; days?: PlanDay[] };
 
+export type WorkoutSet = { weightKg?: number; reps?: number; rir?: number };
+export type WorkoutLog = { _id?: string; date: string; planDay?: string; exercises?: { name: string; sets: WorkoutSet[] }[]; feeling?: string; aiNotes?: string };
+
 export type MealPlan = { _id?: string; source?: string; targetKcal?: number; ingredients?: string[]; text?: string };
 
 export type Supplement = { _id?: string; name: string; dosage?: string; times?: string[]; withFood?: boolean; instructions?: string };
