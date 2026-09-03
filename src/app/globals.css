@@ -262,6 +262,76 @@ body {
 .safety-note, .drawer-intro { color: #7d8d89; font-size: 12px; line-height: 1.6; }
 .full-width { width: 100% !important; }
 
+.motion-guide {
+  overflow: hidden;
+  border: 1px solid #263233;
+  border-radius: 22px;
+  background: linear-gradient(145deg, #101819, #090d0e);
+  box-shadow: inset 0 1px rgb(255 255 255 / 3%);
+}
+
+.motion-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 16px 18px;
+  border-bottom: 1px solid #233031;
+}
+
+.motion-header > div:first-child {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.motion-header strong { font-size: 15px; }
+.tempo-badge { color: #8e9c99; font-size: 10px; font-weight: 800; letter-spacing: .12em; }
+.motion-canvas { position: relative; min-height: 360px; background: radial-gradient(circle at 50% 40%, rgb(199 255 74 / 9%), transparent 48%); }
+.motion-canvas svg { display: block; width: 100%; height: 360px; }
+.motion-grid-line { fill: none; stroke: #314142; stroke-width: .6; opacity: .28; }
+.motion-circuit-shadow { fill: none; stroke: #000; stroke-width: 13; opacity: .5; }
+.motion-circuit { fill: none; stroke-width: 4; stroke-linecap: round; stroke-dasharray: 6 8; opacity: .9; }
+.circuit-dot { filter: drop-shadow(0 0 9px #c7ff4a); }
+.body-line, .equipment { fill: none; stroke: #d9e4e1; stroke-width: 8; stroke-linecap: round; stroke-linejoin: round; }
+.equipment { stroke: #72817e; stroke-width: 5; }
+.equipment.strong { stroke: #aab6b3; stroke-width: 7; }
+.body-fill { fill: #d9e4e1; stroke: #f4f8f7; stroke-width: 3; }
+.joint { fill: #c7ff4a; stroke: #152016; stroke-width: 3; filter: drop-shadow(0 0 5px rgb(199 255 74 / 70%)); }
+.motion-callout { position: absolute; right: 18px; bottom: 18px; left: 18px; display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding: 12px 14px; border: 1px solid rgb(199 255 74 / 20%); border-radius: 14px; background: rgb(7 11 11 / 82%); backdrop-filter: blur(12px); }
+.motion-callout svg { width: auto; height: auto; color: #c7ff4a; }
+.motion-callout span { color: #d8e1de; font-size: 12px; }
+.motion-callout b { color: #c7ff4a; font-size: 18px; }
+.motion-phases { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid #233031; }
+.motion-phases button { position: relative; display: grid; gap: 4px; padding: 14px 16px 18px; overflow: hidden; border: 0; border-right: 1px solid #233031; background: transparent; color: #70807c; text-align: left; cursor: pointer; }
+.motion-phases button:last-child { border-right: 0; }
+.motion-phases button span { font-size: 9px; font-weight: 900; }
+.motion-phases button strong { font-size: 10px; letter-spacing: .1em; }
+.motion-phases button i { position: absolute; right: 0; bottom: 0; left: 0; height: 3px; background: linear-gradient(90deg, #67d8ff, #c7ff4a 60%, #ff875c); transform: scaleX(var(--phase-scale)); transform-origin: left; opacity: .25; }
+.motion-phases button.active { background: rgb(199 255 74 / 6%); color: #c7ff4a; }
+.motion-phases button.active i { opacity: 1; }
+.optional-video-note { margin: -8px 2px 0; color: #71807c; font-size: 11px; line-height: 1.5; }
+
+.is-playing .athlete-press .moving-limbs { animation: press-motion 4.2s cubic-bezier(.6, 0, .35, 1) infinite; transform-box: fill-box; transform-origin: center bottom; }
+.is-playing .athlete-pushup .moving-body { animation: pushup-motion 4.2s cubic-bezier(.6, 0, .35, 1) infinite; transform-box: fill-box; transform-origin: right bottom; }
+.is-playing .athlete-core .moving-body { animation: core-motion 4.2s cubic-bezier(.6, 0, .35, 1) infinite; transform-box: fill-box; transform-origin: right bottom; }
+.is-playing .athlete-squat .moving-body { animation: squat-motion 4.2s cubic-bezier(.6, 0, .35, 1) infinite; transform-box: fill-box; transform-origin: center bottom; }
+.is-playing .athlete-hinge .moving-body { animation: hinge-motion 4.2s cubic-bezier(.6, 0, .35, 1) infinite; transform-box: fill-box; transform-origin: center bottom; }
+.is-playing .athlete-pull .moving-body { animation: pull-motion 4.2s cubic-bezier(.6, 0, .35, 1) infinite; transform-box: fill-box; transform-origin: center top; }
+.is-playing .athlete-curl .moving-limbs { animation: curl-motion 4.2s cubic-bezier(.6, 0, .35, 1) infinite; transform-box: fill-box; transform-origin: center top; }
+
+@keyframes press-motion { 0%, 100% { transform: translateY(18px) scaleY(.8); } 38%, 58% { transform: translateY(-14px) scaleY(1.18); } }
+@keyframes pushup-motion { 0%, 100% { transform: translateY(15px) rotate(3deg); } 40%, 58% { transform: translateY(-13px) rotate(-2deg); } }
+@keyframes core-motion { 0%, 100% { transform: rotate(0); } 40%, 58% { transform: rotate(-13deg) translateY(-8px); } }
+@keyframes squat-motion { 0%, 100% { transform: translateY(0) scaleY(1); } 42%, 58% { transform: translateY(39px) scaleY(.8) scaleX(1.08); } }
+@keyframes hinge-motion { 0%, 100% { transform: rotate(-2deg); } 42%, 58% { transform: rotate(23deg) translate(13px, 4px); } }
+@keyframes pull-motion { 0%, 100% { transform: translateY(24px) scaleY(1.02); } 42%, 58% { transform: translateY(-14px) scaleY(.88); } }
+@keyframes curl-motion { 0%, 100% { transform: rotate(0); } 42%, 58% { transform: translateY(-28px) scaleY(.72); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .motion-guide * { animation: none !important; }
+}
+
 .ai-markdown { color: #cbd4d1; line-height: 1.7; }
 .ai-markdown h1, .ai-markdown h2, .ai-markdown h3 { color: #f4f7f5; }
 .ai-markdown strong { color: #c7ff4a; }

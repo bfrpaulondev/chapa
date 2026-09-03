@@ -57,6 +57,7 @@ import {
   type Profile,
   type WorkoutPlan,
 } from "@/lib/api";
+import { MovementGuide } from "./movement-guide";
 
 const { Header, Sider, Content } = Layout;
 const { TextArea } = Input;
@@ -459,9 +460,9 @@ function ExerciseStudio({ guide }: { guide: ExerciseGuide }) {
             <Progress percent={Math.round(phaseProgress * 100)} showInfo={false} strokeColor={MODE_META.push.color} />
           </Card>
         </>
-      ) : (
-        <Empty description={guide.reason ?? "Vídeo indisponível"} />
-      )}
+      ) : null}
+      <MovementGuide exerciseName={guide.name} />
+      {!guide.available && guide.reason ? <p className="optional-video-note">Vídeo externo opcional: {guide.reason}</p> : null}
       <Card title="Pontos de técnica" bordered={false}>
         <Timeline items={guide.steps.slice(0, 6).map((step) => ({ children: step, color: "#c7ff4a" }))} />
         <p className="safety-note">Indicadores educativos sincronizados com o vídeo; não substituem avaliação presencial nem fazem análise da câmara.</p>
