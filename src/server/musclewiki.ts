@@ -1,5 +1,21 @@
 const MUSCLEWIKI_URL = "https://api.musclewiki.com";
 
+const EXERCISE_ALIASES: Record<string, string> = {
+  "supino reto": "Barbell Bench Press",
+  "supino inclinado": "Incline Barbell Bench Press",
+  "mergulho": "Chest Dip",
+  "flexão de braços": "Push Up",
+  "flexao de bracos": "Push Up",
+  "tríceps na polia": "Cable Pushdown",
+  "triceps na polia": "Cable Pushdown",
+  "agachamento livre": "Barbell Squat",
+  "levantamento terra": "Barbell Deadlift",
+  "remada curvada": "Bent Over Barbell Row",
+  "rosca direta": "Barbell Curl",
+  "elevação lateral": "Dumbbell Lateral Raise",
+  "elevacao lateral": "Dumbbell Lateral Raise",
+};
+
 type MuscleWikiVideo = {
   url?: string | null;
   angle: string;
@@ -45,7 +61,8 @@ export async function findExerciseGuide(query: string): Promise<ExerciseGuide> {
   }
 
   const headers = { "X-API-Key": key };
-  const search = await fetch(`${MUSCLEWIKI_URL}/search?q=${encodeURIComponent(query)}&limit=1&gender=male`, { headers });
+  const canonicalQuery = EXERCISE_ALIASES[query.toLocaleLowerCase("pt")] ?? query;
+  const search = await fetch(`${MUSCLEWIKI_URL}/search?q=${encodeURIComponent(canonicalQuery)}&limit=1&gender=male`, { headers });
   if (!search.ok) throw new Error(`MuscleWiki search ${search.status}`);
   const results = (await search.json()) as Array<{
     id: number;
