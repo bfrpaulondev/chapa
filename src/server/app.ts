@@ -12,9 +12,12 @@ import {
   ChatMessageModel,
   DailyBriefModel,
   TipCacheModel,
+  CoachDecisionModel,
   today,
 } from "./db.js";
 import { BASE_SYSTEM, complete, completeJSON, stream, userContext, vision } from "./ai.js";
+import { createCoachDecision, recordDecisionFeedback, type ReadinessInput } from "./autonomy.js";
+import { findExerciseGuide } from "./musclewiki.js";
 
 const MAX_IMAGE_CHARS = 6_000_000; // ~4.5MB de imagem base64
 
@@ -35,7 +38,8 @@ export function buildApp(): FastifyInstance {
       mongo = (e as Error).message.slice(0, 200);
     }
     const openai = process.env.OPENAI_API_KEY ? "ok" : "faltando";
-    return { ok: true, ts: Date.now(), mongo, openai };
+    const musclewiki = process.env.MUSCLEWIKI_API_KEY ? "ok" : "opcional";
+    return { ok: true, ts: Date.now(), mongo, openai, musclewiki };
   });
 
   // ---------- Perfil ----------
@@ -98,6 +102,39 @@ export function buildApp(): FastifyInstance {
     return { tip };
   });
 
+  // ---------- Centro autónomo de decisões ----------
+  app.get("/api/coach/decision", async () =>
+    CoachDecisionModel.findOne({ date: today() }).sort({ createdAt: -1 }).lean()
+  );
+
+  app.post("/api/coach/decision", async (req) => {
+    const body = (req.body ?? {}) as Partial<ReadinessInput>;
+    return createCoachDecision(today(), {
+      energy: Number(body.energy ?? 6),
+      sleepHours: Number(body.sleepHours ?? 7),
+      soreness: Number(body.soreness ?? 4),
+      stress: Number(body.stress ?? 4),
+      availableMinutes: Number(body.availableMinutes ?? 60),
+      notes: body.notes,
+    });
+  });
+
+  app.post("/api/coach/feedback", async (req, reply) => {
+    const body = (req.body ?? {}) as {
+      decisionId?: string;
+      rating?: number;
+      perceivedExertion?: number;
+      completed?: boolean;
+    };
+    if (!body.decisionId) return reply.code(400).send({ error: "decisionId obrigatório" });
+    return recordDecisionFeedback({
+      decisionId: body.decisionId,
+      rating: Number(body.rating ?? 3),
+      perceivedExertion: Number(body.perceivedExertion ?? 7),
+      completed: Boolean(body.completed),
+    });
+  });
+
   // ---------- Coach chat (streaming) ----------
   app.get("/api/coach/chat", async () =>
     ChatMessageModel.find().sort({ createdAt: -1 }).limit(50).lean().then((r) => r.reverse())
@@ -145,10 +182,10 @@ export function buildApp(): FastifyInstance {
     const ctx = await userContext();
     const plan = await completeJSON<{
       split: string;
-      days: { day: string; focus: string; exercises: { name: string; sets: number; reps: string; rest: string; notes: string }[] }[];
+      days: { day: string; focus: string; exercises: { name: string; lookup: string; sets: number; reps: string; rest: string; notes: string }[] }[];
     }>(
       BASE_SYSTEM +
-        ' Geras um plano de treino em JSON: {"split": "nome do split", "days": [{"day": "Segunda", "focus": "Peito/Tríceps", "exercises": [{"name": "", "sets": 4, "reps": "8-12", "rest": "90s", "notes": "dica curta"}]}]}. ' +
+        ' Geras um plano de treino em JSON: {"split": "nome do split", "days": [{"day": "Segunda", "focus": "Peito/Tríceps", "exercises": [{"name": "nome em português", "lookup": "canonical exercise name in English for MuscleWiki", "sets": 4, "reps": "8-12", "rest": "90s", "notes": "dica curta"}]}]}. ' +
         "Entre 5 e 8 exercícios por dia. Consistente com objetivo, experiência e equipamento do utilizador.",
       `Gerar plano. ${body.daysPerWeek ? `Dias/semana: ${body.daysPerWeek}.` : ""} ${body.goal ? `Objetivo: ${body.goal}.` : ""} ${body.notes ?? ""}\n${ctx}`,
       2600
@@ -176,6 +213,18 @@ export function buildApp(): FastifyInstance {
   app.get("/api/workout/logs", async (req) => {
     const q = Number((req.query as { limit?: string }).limit ?? 14);
     return WorkoutLogModel.find().sort({ date: -1 }).limit(Math.min(q, 60)).lean();
+  });
+
+  // ---------- Guias e vídeos MuscleWiki ----------
+  app.get("/api/exercises/search", async (req, reply) => {
+    const query = String((req.query as { q?: string }).q ?? "").trim();
+    if (query.length < 2) return reply.code(400).send({ error: "q deve ter pelo menos 2 caracteres" });
+    try {
+      return await findExerciseGuide(query.slice(0, 200));
+    } catch (error) {
+      console.warn("[chapa] MuscleWiki unavailable:", (error as Error).message);
+      return reply.code(502).send({ error: "Vídeo indisponível neste momento. Tenta novamente." });
+    }
   });
 
   // ---------- Nutrição ----------

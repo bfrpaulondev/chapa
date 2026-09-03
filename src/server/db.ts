@@ -67,6 +67,7 @@ const WorkoutPlan = new Schema(
         exercises: [
           {
             name: String,
+            lookup: String,
             sets: Number,
             reps: String,
             rest: String,
@@ -88,6 +89,67 @@ const WorkoutLog = new Schema(
     ],
     feeling: String,
     aiNotes: String,
+  },
+  { timestamps: true }
+);
+
+const CheckIn = new Schema(
+  {
+    date: { type: String, required: true },
+    energy: { type: Number, min: 1, max: 10 },
+    sleepHours: Number,
+    soreness: { type: Number, min: 1, max: 10 },
+    stress: { type: Number, min: 1, max: 10 },
+    availableMinutes: Number,
+    notes: String,
+  },
+  { timestamps: true }
+);
+
+const CoachDecision = new Schema(
+  {
+    date: { type: String, required: true },
+    title: String,
+    mode: { type: String, enum: ["push", "maintain", "recover"], default: "maintain" },
+    confidence: Number,
+    readinessScore: Number,
+    summary: String,
+    reasoning: [String],
+    actions: [
+      {
+        kind: String,
+        title: String,
+        detail: String,
+        priority: Number,
+        status: { type: String, default: "pending" },
+      },
+    ],
+    checkInId: Schema.Types.ObjectId,
+    modelVersion: String,
+    reward: Number,
+  },
+  { timestamps: true }
+);
+
+const LearningState = new Schema(
+  {
+    key: { type: String, required: true, unique: true },
+    weights: { type: Map, of: Number, default: {} },
+    samples: { type: Number, default: 0 },
+    averageReward: { type: Number, default: 0 },
+    modelVersion: { type: String, default: "online-v1" },
+  },
+  { timestamps: true }
+);
+
+const LearningEvent = new Schema(
+  {
+    decisionId: Schema.Types.ObjectId,
+    rating: { type: Number, min: 1, max: 5 },
+    perceivedExertion: { type: Number, min: 1, max: 10 },
+    completed: Boolean,
+    reward: Number,
+    features: { type: Map, of: Number },
   },
   { timestamps: true }
 );
@@ -150,7 +212,7 @@ const TipCache = new Schema({
   text: String,
 });
 
-function model<T>(name: string, schema: Schema): Model<InferSchemaType<typeof schema>> {
+function model(name: string, schema: Schema): Model<InferSchemaType<typeof schema>> {
   return mongoose.models[name] ?? mongoose.model(name, schema);
 }
 
@@ -158,6 +220,10 @@ export const ProfileModel = model("Profile", Profile);
 export const MetricModel = model("Metric", Metric);
 export const WorkoutPlanModel = model("WorkoutPlan", WorkoutPlan);
 export const WorkoutLogModel = model("WorkoutLog", WorkoutLog);
+export const CheckInModel = model("CheckIn", CheckIn);
+export const CoachDecisionModel = model("CoachDecision", CoachDecision);
+export const LearningStateModel = model("LearningState", LearningState);
+export const LearningEventModel = model("LearningEvent", LearningEvent);
 export const MealPlanModel = model("MealPlan", MealPlan);
 export const SupplementModel = model("Supplement", Supplement);
 export const PhotoModel = model("Photo", Photo);

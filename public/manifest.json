@@ -1,7 +1,7 @@
 {
-  "name": "CHAPA — Treino + Coach IA",
+  "name": "CHAPA — VIGOR AI",
   "short_name": "CHAPA",
-  "description": "Treino, nutrição, suplementos e coach IA — barriga chapada, braço grosso.",
+  "description": "Coach autónomo de treino, nutrição e evolução física.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

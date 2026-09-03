@@ -61,7 +61,7 @@ export type Brief = {
 export type PlanDay = {
   day: string;
   focus: string;
-  exercises: { name: string; sets: number; reps: string; rest: string; notes: string }[];
+  exercises: { name: string; lookup?: string; sets: number; reps: string; rest: string; notes: string }[];
 };
 
 export type WorkoutPlan = { _id?: string; split?: string; goal?: string; daysPerWeek?: number; days?: PlanDay[] };
@@ -75,3 +75,28 @@ export type Metric = { _id?: string; date: string; weightKg?: number; waistCm?: 
 export type Photo = { _id?: string; date: string; note?: string; analysis?: string };
 
 export type ChatMsg = { _id?: string; role: "user" | "assistant"; content: string };
+
+export type CoachDecision = {
+  _id?: string;
+  date: string;
+  title: string;
+  mode: "push" | "maintain" | "recover";
+  confidence: number;
+  readinessScore: number;
+  summary: string;
+  reasoning: string[];
+  actions: { kind: string; title: string; detail: string; priority: number; status?: string }[];
+  modelVersion?: string;
+};
+
+export type ExerciseGuide = {
+  id?: number;
+  name: string;
+  muscles: string[];
+  equipment?: string;
+  difficulty?: string | null;
+  steps: string[];
+  videos: { url: string; angle: string; thumbnail?: string }[];
+  available: boolean;
+  reason?: string;
+};

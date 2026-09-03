@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Sora } from "next/font/google";
-import { Toaster } from "@/components/ui/sonner";
+import { AntdRegistry } from "@ant-design/nextjs-registry";
+import { ChapaProviders } from "@/components/chapa/providers";
 import "./globals.css";
 
 const sora = Sora({
@@ -9,8 +10,8 @@ const sora = Sora({
 });
 
 export const metadata: Metadata = {
-  title: "CHAPA",
-  description: "Treino, nutrição, suplementos e coach IA — barriga chapada, braço grosso.",
+  title: "CHAPA — VIGOR AI",
+  description: "Coach autónomo de treino, nutrição e evolução física.",
   manifest: "/manifest.json",
   appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "CHAPA" },
 };
@@ -25,9 +26,10 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="pt" className={`${sora.variable} h-full antialiased dark`}>
-      <body className="min-h-full flex flex-col bg-background text-foreground">
-        {children}
-        <Toaster position="top-center" />
+      <body className="min-h-full bg-background text-foreground">
+        <AntdRegistry>
+          <ChapaProviders>{children}</ChapaProviders>
+        </AntdRegistry>
       </body>
     </html>
   );

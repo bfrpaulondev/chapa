@@ -1,0 +1,3 @@
+{"mode":"push","reward":0.8,"checkIn":{"energy":9,"sleepHours":8,"soreness":2,"stress":3,"availableMinutes":75}}
+{"mode":"recover","reward":0.6,"checkIn":{"energy":3,"sleepHours":5,"soreness":8,"stress":7,"availableMinutes":30}}
+{"mode":"maintain","reward":0.7,"checkIn":{"energy":6,"sleepHours":7,"soreness":4,"stress":5,"availableMinutes":60}}
