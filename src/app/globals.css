@@ -319,6 +319,19 @@ body {
 .youtube-frame iframe { position: absolute; width: 100%; height: 100%; border: 0; inset: 0; }
 .youtube-caption { margin: 0; padding: 11px 18px 14px; color: #a8b5b2; font-size: 12px; }
 .youtube-exercise .ant-alert { margin: 0 14px 14px; }
+.load-prescription .ant-card-head-title { display: flex; align-items: center; gap: 8px; }
+.load-targets { margin-bottom: 14px; }
+.load-prescription .ant-alert { margin-bottom: 18px; }
+.set-log-heading, .set-log-row { display: grid; grid-template-columns: 42px minmax(82px, .8fr) minmax(72px, .65fr) minmax(190px, 1.5fr); gap: 10px; align-items: center; }
+.set-log-heading { padding: 0 4px 7px; color: #697875; font-size: 9px; font-weight: 900; letter-spacing: .1em; }
+.set-log-list { display: grid; gap: 9px; }
+.set-log-row { padding: 10px; border: 1px solid #273332; border-radius: 12px; background: #0a0f0f; }
+.set-log-row > strong { color: #c7ff4a; }
+.set-log-row .ant-input-number { width: 100%; }
+.set-log-row .ant-segmented { width: 100%; }
+.set-log-row .ant-segmented-group { display: grid; grid-template-columns: repeat(5, 1fr); }
+.rir-help { margin: 14px 0 0; color: #81908d; font-size: 11px; line-height: 1.55; }
+.rir-help strong { color: #c7ff4a; }
 
 .is-playing .athlete-press .moving-limbs { animation: press-motion 4.2s cubic-bezier(.6, 0, .35, 1) infinite; transform-box: fill-box; transform-origin: center bottom; }
 .is-playing .athlete-pushup .moving-body { animation: pushup-motion 4.2s cubic-bezier(.6, 0, .35, 1) infinite; transform-box: fill-box; transform-origin: right bottom; }
@@ -338,6 +351,12 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .motion-guide * { animation: none !important; }
+}
+
+@media (max-width: 640px) {
+  .set-log-heading { display: none; }
+  .set-log-row { grid-template-columns: 34px 1fr 1fr; }
+  .set-log-row .ant-segmented { grid-column: 2 / -1; }
 }
 
 .ai-markdown { color: #cbd4d1; line-height: 1.7; }
