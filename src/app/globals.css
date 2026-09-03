@@ -311,6 +311,14 @@ body {
 .motion-phases button.active { background: rgb(199 255 74 / 6%); color: #c7ff4a; }
 .motion-phases button.active i { opacity: 1; }
 .optional-video-note { margin: -8px 2px 0; color: #71807c; font-size: 11px; line-height: 1.5; }
+.youtube-exercise { overflow: hidden; border: 1px solid #293836; border-radius: 20px; background: #0c1211; }
+.youtube-exercise-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 18px; border-bottom: 1px solid #293836; }
+.youtube-exercise-heading > div { display: flex; align-items: center; gap: 10px; }
+.youtube-exercise-heading > span { color: #82918e; font-size: 12px; }
+.youtube-frame { position: relative; aspect-ratio: 16 / 9; background: #050706; }
+.youtube-frame iframe { position: absolute; width: 100%; height: 100%; border: 0; inset: 0; }
+.youtube-caption { margin: 0; padding: 11px 18px 14px; color: #a8b5b2; font-size: 12px; }
+.youtube-exercise .ant-alert { margin: 0 14px 14px; }
 
 .is-playing .athlete-press .moving-limbs { animation: press-motion 4.2s cubic-bezier(.6, 0, .35, 1) infinite; transform-box: fill-box; transform-origin: center bottom; }
 .is-playing .athlete-pushup .moving-body { animation: pushup-motion 4.2s cubic-bezier(.6, 0, .35, 1) infinite; transform-box: fill-box; transform-origin: right bottom; }
